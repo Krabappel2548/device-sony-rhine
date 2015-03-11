@@ -44,6 +44,10 @@ on init
 
     mkdir /dev/bus 0755 root root
     mkdir /dev/bus/usb 0755 root root
+	
+	# start recovery-switch script
+	start recovery
+    wait /dev/.recovery_aborted 9999999
 
 on fs
     mount_all ./fstab.rhine
@@ -429,6 +433,16 @@ service hciattach /system/bin/sh /system/etc/init.rhine.bt.sh
     disabled
     oneshot
 
+# launched by on-init, continues if user does not want
+# to enter recovery
+service recovery /sbin/busybox_static sh /recovery.sh
+    class main
+    user root
+    group root
+    oneshot
+    seclabel u:r:recovery:s0
+    disabled
+	
 on property:bluetooth.hciattach=true
     start hciattach
 
